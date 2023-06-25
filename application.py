@@ -8,8 +8,8 @@ import pandas as pd
 application = Flask(__name__)
 app=application
 
-scaler=pickle.load(open("Model/standardScalar.pkl", "rb"))
-model = pickle.load(open("Model/modelForPrediction.pkl", "rb"))
+encoder=pickle.load(open("/config/workspace/Model/encoderfruad.pkl", "rb"))
+model = pickle.load(open("/config/workspace/Model/modelrffruad.pkl", "rb"))
 
 ## Route for homepage
 
@@ -24,22 +24,23 @@ def predict_datapoint():
 
     if request.method=='POST':
 
-        Pregnancies=int(request.form.get("Pregnancies"))
-        Glucose = float(request.form.get('Glucose'))
-        BloodPressure = float(request.form.get('BloodPressure'))
-        SkinThickness = float(request.form.get('SkinThickness'))
-        Insulin = float(request.form.get('Insulin'))
-        BMI = float(request.form.get('BMI'))
-        DiabetesPedigreeFunction = float(request.form.get('DiabetesPedigreeFunction'))
-        Age = float(request.form.get('Age'))
+        step=int(request.form.get("step"))
+        customer=int(request.form.get("customer"))
+        age=int(request.form.get("age"))
+        gender=int(request.form.get("gender"))
+        merchant=int(request.form.get("merchant"))
+        category=(request.form.get("category"))
+        amount=float(request.form.get("amount"))
 
-        new_data=scaler.transform([[Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,BMI,DiabetesPedigreeFunction,Age]])
+        category=encoder.transform([category])[0]
+        new_data=[[step,customer,age,gender,merchant,category,amount]]
+
         predict=model.predict(new_data)
        
         if predict[0] ==1 :
-            result = 'Diabetic'
+            result = 'Fraud'
         else:
-            result ='Non-Diabetic'
+            result ='not Fraud'
             
         return render_template('single_prediction.html',result=result)
 
